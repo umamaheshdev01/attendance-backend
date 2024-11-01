@@ -2,11 +2,12 @@ import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/co
 import { PrismaService } from 'src/prisma/prisma.service';
 import { LoginDto } from './dto/login-dto';
 import { SignDto } from './dto/sign.dto';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
 
-   constructor(private prismaService: PrismaService) {}
+   constructor(private prismaService: PrismaService ,private jwt : JwtService) {}
 
    async loginUser(loginDto: LoginDto) {
       const { id, password } = loginDto;
@@ -18,7 +19,9 @@ export class AuthService {
          throw new UnauthorizedException('Invalid credentials');
       }
 
-      return { message: 'Login successful', studentId: student.student_id };
+      const payload = {id : student.student_id , name : student.name}
+
+      return { message: 'Login successful', accessToken : this.jwt.sign(payload)};
    }
 
    async createUser(signDto: SignDto) {
